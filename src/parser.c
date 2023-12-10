@@ -8,6 +8,8 @@ char* parser_parse_file_content(char* filename) {
     FILE* file = file_open(filename, "r");
 
     char* content = file_read(file);
+    string_remove_new_lines(content);
+    printf("%s\n", content);
 
     file_close(file);
 
@@ -21,13 +23,20 @@ void parser_initialize(char* to_be_parsed) {
 }
 
 void parser_parse_next() {
-    char* token = strtok(content + content_character_idx, " ");
-    printf("%s\n", token);
-    if (token != NULL) {
-        *current_token = lexer_tokenize(token);
-        content_character_idx += strlen(token) + 1;
-    } else {
-        current_token->type = TOKEN_INVALID;
+    int index = 0;
+    char* buffer = string_new(&global_allocator, strlen(content));
+
+    for (int i = content_character_idx; i < strlen(content); i++) {
+        if(content[i] == ' ') {
+            buffer[index] = '\0';
+            printf("Buffer: %s\n", buffer);
+            *current_token = lexer_tokenize(buffer);
+            index = 0;
+            content_character_idx = i+1;
+            break;
+        } else {
+            buffer[index++] = content[i];
+        }
     }
 }
 
@@ -45,41 +54,45 @@ void parser_parse_function() {
     parser_parse_next();
     match(TOKEN_IdentifierType);
     match(TOKEN_IdentifierFuncton);
-    match(TOKEN_BracketOpen);
+    match(TOKEN_TypeBracketOpen);
 
     // Parse arguments and their types
-    while (current_token->type != TOKEN_BracketClosed) {
+    while (current_token->type != TOKEN_TypeBracketClosed) {
+        match(TOKEN_IdentifierVariable);
         match(TOKEN_IdentifierType);
-        //match(TOKEN_IdentifierVariable);
     }
-    match(TOKEN_BracketClosed);
-    match(TOKEN_CurlyBracketOpen);
+    match(TOKEN_TypeBracketClosed);
+    match(TOKEN_TypeCurlyBracketOpen);
 
     // Parse body
-    while (current_token->type != TOKEN_CurlyBracketClosed) {
-        //parse_statement();
-        parser_parse_next();
-        printf("Body\n");
-    }
+    parser_parse_body();
+}
 
-    //match(TOKEN_CurlyBracketClosed); // This will seg fault because we've already reached the last curly bracket :)
+void parser_parse_body() {
+    while (current_token->type != TOKEN_TypeCurlyBracketClosed) {
+        parser_parse_next();
+
+        if (current_token->type == TOKEN_KeywordIf) { // Parse if statement
+            parser_parse_if_statement();
+        } else if (current_token->type == TOKEN_KeywordFor) { // Parse for loop
+
+        } else if (current_token->type == TOKEN_KeywordWhile) { // Parse while loop
+
+        }
+    }
 }
 
 void parser_parse_if_statement() {
-    match(TOKEN_KeywordIf);
-    match(TOKEN_BracketOpen);
+    parser_parse_next();
+    match(TOKEN_TypeBracketOpen);
 
-    while (current_token->type != TOKEN_BracketClosed) {
-        match(TOKEN_IdentiferCondition);
+    while (current_token->type != TOKEN_TypeBracketClosed) {
+        parser_parse_next();
     }
 
-    match(TOKEN_BracketClosed);
-    match(TOKEN_CurlyBracketOpen);
+    match(TOKEN_TypeBracketClosed);
+    match(TOKEN_TypeCurlyBracketOpen);
 
     // Parse body
-    while (current_token->type != TOKEN_CurlyBracketClosed) {
-        printf("Body\n");
-    }
-
-    //match(TOKEN_CurlyBracketClosed); // This will seg fault because we've already reached the last curly bracket :)
+    parser_parse_body();
 }

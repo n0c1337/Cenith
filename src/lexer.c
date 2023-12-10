@@ -26,10 +26,20 @@ Token lexer_tokenize(char* content) {
     } else if (strcmp(content, "return") == 0) {
         token.type = TOKEN_KeywordReturn;
         token.identifier = Token_IdentifierKeyword;
+    } else if (strcmp(content, "if") == 0) {
+        token.type = TOKEN_KeywordIf;
     } else if (string_is_alphanumeric(content) == 1) { // Needs to be one of the last compares so it won't get overwritten by others.
         token.type = TOKEN_IdentifierFuncton;
         token.identifier = TOKEN_IdentifierFuncton;
+        token.value = content;
+    } else if (string_is_alphanumeric_except_colon(content) == 1) {
+        token.type = TOKEN_IdentifierVariable;
+        token.identifier = TOKEN_IdentifierVariable;
+        token.value = content;
     }
+
+    if (strcmp(content, "==") == 0)
+        token.identifier = TOKEN_IdentiferCondition;
 
     if (token.type == TOKEN_INVALID)
         token = lexer_tokenize_single(content[0]);
@@ -41,25 +51,25 @@ Token lexer_tokenize_single(char ch) {
     Token token = { -1, -1, NULL };
     switch (ch) {
         case ';':
-            token.type = TOKEN_Semicolon;
+            token.type = TOKEN_TypeSemicolon;
             break;
         case '(':
-            token.type = TOKEN_BracketOpen;
+            token.type = TOKEN_TypeBracketOpen;
             break;
         case ')':
-            token.type = TOKEN_BracketClosed;
+            token.type = TOKEN_TypeBracketClosed;
             break;
         case '{':
-            token.type = TOKEN_CurlyBracketOpen;
+            token.type = TOKEN_TypeCurlyBracketOpen;
             break;
         case '}':
-            token.type = TOKEN_CurlyBracketClosed;
+            token.type = TOKEN_TypeCurlyBracketClosed;
             break;
         case '[':
-            token.type = TOKEN_SquareBracketOpen;
+            token.type = TOKEN_TypeSquareBracketOpen;
             break;
         case ']':
-            token.type = TOKEN_SquareBrackedClosed;
+            token.type = TOKEN_TypeSquareBrackedClosed;
             break;
         case '+':
             token.type = TOKEN_OperatorPlus;
@@ -72,6 +82,9 @@ Token lexer_tokenize_single(char ch) {
             break;
         case '/':
             token.type = TOKEN_OperatorDivision;
+            break;
+        case '=':
+            token.type = TOKEN_OperatorAssignment;
             break;
     }
     return token;

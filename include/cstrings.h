@@ -9,7 +9,9 @@ char* string_new(Allocator* allocator, size_t size);
 char* string_from(Allocator* allocator, char* str);
 void string_delete(Allocator* allocator, char* str);
 char* string_resize(Allocator* allocator, char* str, size_t new_size);
-void string_clear(char *str);
+void string_clear(char* str);
+void string_remove_new_lines(char* str);
 int string_is_alphanumeric(char* str);
+int string_is_alphanumeric_except_colon(char* str);
 
 #endif 

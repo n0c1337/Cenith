@@ -11,7 +11,7 @@
 #define ALLOCATOR_OPTIMIZED_FREE 1 
 #define ALLOCATOR_INFORMATIONS 0
 
-typedef struct _Allocator {
+typedef struct allocator_t {
     void** allocations;
     size_t capacity;
     int current_size;

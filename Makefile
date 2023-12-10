@@ -11,7 +11,7 @@ SRCS = $(wildcard $(SRC_DIR)/*.c)
 OBJS = $(patsubst $(SRC_DIR)/%.c, $(BUILD_DIR)/%.o, $(SRCS))
 
 # Name of the  executable
-TARGET = $(BIN_DIR)/run
+TARGET = $(BIN_DIR)/run.out
 
 # Default target
 all: $(TARGET)
