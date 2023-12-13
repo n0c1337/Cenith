@@ -54,14 +54,3 @@ int string_is_alphanumeric(char* str) {
 
     return 1;
 }
-
-int string_is_alphanumeric_except_colon(char* str) {
-    while (*str) {
-        if (!isalnum(*str) && *str != ':') {
-            return 0;
-        }
-        str++;
-    }
-
-    return 1;
-}

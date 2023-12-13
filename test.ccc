@@ -1,0 +1,7 @@
+i32 add ( i32 a i32 b ) {
+    i32 c = a + b
+    if ( cc == 2 ) { 
+        cc = 4
+    }
+    return cc
+}

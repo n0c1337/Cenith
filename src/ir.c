@@ -12,12 +12,12 @@ void ir_cleanup() {
 
 void ir_translate_to_ir(Token* token) {
 
-    if (token->identifier == TOKEN_IdentifierFuncton) {
+    if (token->type_identifier == TOKEN_IDENTIFIER) {
         char* function_identifier = ir_translate_function(token);
         file_write_line(file, function_identifier);
     }
     
-    else if (token->identifier == TOKEN_IdentifierVariable) {
+    else if (token->type_identifier == TOKEN_IDENTIFIER_TYPE) {
         char* variable_identifier = ir_translate_function_parameter(token);
         file_write_line(file, variable_identifier);
     }

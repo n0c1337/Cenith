@@ -6,58 +6,61 @@
 #include <stdbool.h>
 #include "cstrings.h"
 
-typedef enum _Tokens {
+typedef enum tokens_t {
     TOKEN_INVALID = -1,
-    TOKEN_VALID,
-    TOKEN_SPACE,
-    TOKEN_TypeInt8,
-    TOKEN_TypeInt16,
-    TOKEN_TypeInt32,
-    TOKEN_TypeInt64,
-    TOKEN_TypeFloat,
-    TOKEN_TypeDouble,
-    TOKEN_TypeVoid,
-    TOKEN_TypeSemicolon,
-    TOKEN_ValueNumber,
-    TOKEN_ValueFloat,
-    TOKEN_IdentifierType,
-    TOKEN_IdentifierVariable,
-    TOKEN_IdentifierFuncton,
-    TOKEN_IdentiferCondition,
-    Token_IdentifierKeyword,
-    TOKEN_IdentifierPointer,
-    TOKEN_TypeBracketOpen,
-    TOKEN_TypeBracketClosed,
-    TOKEN_TypeCurlyBracketOpen,
-    TOKEN_TypeCurlyBracketClosed,
-    TOKEN_TypeSquareBracketOpen,
-    TOKEN_TypeSquareBrackedClosed,
-    TOKEN_KeywordIf,
-    TOKEN_KeywordElse,
-    TOKEN_KeywordFor,
-    TOKEN_KeywordWhile,
-    TOKEN_KeywordReturn,
-    TOKEN_KeywordAssembly,
-    TOKEN_FunctionCall,
-    TOKEN_OperatorPlus,
-    TOKEN_OperatorMinus,
-    TOKEN_OperatorMultiply,
-    TOKEN_OperatorDivision,
-    TOKEN_OperatorAssignment,
-    Token_ConditionCompare,
+    // Keywords
+    TOKEN_KEYWORD_i8,
+    TOKEN_KEYWORD_i16,
+    TOKEN_KEYWORD_i32,
+    TOKEN_KEYWORD_i64,
+    TOKEN_KEYWORD_float,
+    TOKEN_KEYWORD_if,
+    TOKEN_KEYWORD_for,
+    TOKEN_KEYWORD_while,
+    TOKEN_KEYWORD_return,
+    // identifier
+    TOKEN_IDENTIFIER,
+    TOKEN_IDENTIFIER_TYPE,
+    TOKEN_IDENTIFIER_POINTER,
+    // Literals
+    TOKEN_LITERAL_INTEGER,
+    TOKEN_LITERAL_STRING,
+    TOKEN_LITERAL_FLOAT,
+    // Grammatic characters
+    TOKEN_GC_PARENTHESES_OPEN,
+    TOKEN_GC_PARENTHESES_CLOSED,
+    TOKEN_GC_CURLY_BRACKET_OPEN,
+    TOKEN_GC_CURLY_BRACKET_CLOSED,
+    TOKEN_GC_SQUARE_BRACKET_OPEN,
+    TOKEN_GC_SQUARE_BRACKET_CLOSED,
+    TOKEN_GC_SEMICOLON,
+    // Function related
+    TOKEN_FUNCTION_CALL,
+    // Operators
+    TOKEN_OPERATOR_Plus,
+    TOKEN_OPERATOR_Minus,
+    TOKEN_OPERATOR_Multiply,
+    TOKEN_OPERATOR_Division,
+    TOKEN_OPERATOR_Assignment,
 } Tokens;
 
 typedef struct token_t {
-    // The parent type of a the Token (e.g. i8, i16 are "Type Identifiers")
-    Tokens identifier;
     // The exact type of the Token
     Tokens type;
     // Tokens value (only used for control structures)
     char* value;
     // Size of the Token
     long size;
+    Tokens type_identifier;
 } Token;
 
+typedef struct mapping_t {
+    const char* keyword;
+    Tokens type;
+    Tokens type_identifier;
+} Mapping;
+
+Token lexer_is_keyword(char* word);
 Token lexer_tokenize(char* content);
 Token lexer_tokenize_single(char ch);
 

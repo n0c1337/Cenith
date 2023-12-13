@@ -40,8 +40,9 @@ void parser_parse_next() {
     }
 }
 
+// Match a specific token type or a tokens identifier
 void match(Tokens expected_token) {
-    if (expected_token == current_token->type || expected_token == current_token->identifier) {
+    if (expected_token == current_token->type || expected_token == current_token->type_identifier) {
         parser_parse_next();
     } else {
         printf("Error: Expected token %d, but got token %d\n", expected_token, current_token->type);
@@ -52,31 +53,31 @@ void match(Tokens expected_token) {
 
 void parser_parse_function() {
     parser_parse_next();
-    match(TOKEN_IdentifierType);
-    match(TOKEN_IdentifierFuncton);
-    match(TOKEN_TypeBracketOpen);
+    match(TOKEN_IDENTIFIER_TYPE);
+    match(TOKEN_IDENTIFIER);
+    match(TOKEN_GC_PARENTHESES_OPEN);
 
     // Parse arguments and their types
-    while (current_token->type != TOKEN_TypeBracketClosed) {
-        match(TOKEN_IdentifierVariable);
-        match(TOKEN_IdentifierType);
+    while (current_token->type != TOKEN_GC_PARENTHESES_CLOSED) {
+        match(TOKEN_IDENTIFIER_TYPE);
+        match(TOKEN_IDENTIFIER);
     }
-    match(TOKEN_TypeBracketClosed);
-    match(TOKEN_TypeCurlyBracketOpen);
+    match(TOKEN_GC_PARENTHESES_CLOSED);
+    match(TOKEN_GC_CURLY_BRACKET_OPEN);
 
     // Parse body
     parser_parse_body();
 }
 
 void parser_parse_body() {
-    while (current_token->type != TOKEN_TypeCurlyBracketClosed) {
+    while (current_token->type != TOKEN_GC_CURLY_BRACKET_CLOSED) {
         parser_parse_next();
 
-        if (current_token->type == TOKEN_KeywordIf) { // Parse if statement
+        if (current_token->type == TOKEN_KEYWORD_if) { // Parse if statement
             parser_parse_if_statement();
-        } else if (current_token->type == TOKEN_KeywordFor) { // Parse for loop
+        } else if (current_token->type == TOKEN_KEYWORD_for) { // Parse for loop
 
-        } else if (current_token->type == TOKEN_KeywordWhile) { // Parse while loop
+        } else if (current_token->type == TOKEN_KEYWORD_while) { // Parse while loop
 
         }
     }
@@ -84,14 +85,14 @@ void parser_parse_body() {
 
 void parser_parse_if_statement() {
     parser_parse_next();
-    match(TOKEN_TypeBracketOpen);
+    match(TOKEN_GC_PARENTHESES_OPEN);
 
-    while (current_token->type != TOKEN_TypeBracketClosed) {
+    while (current_token->type != TOKEN_GC_PARENTHESES_CLOSED) {
         parser_parse_next();
     }
 
-    match(TOKEN_TypeBracketClosed);
-    match(TOKEN_TypeCurlyBracketOpen);
+    match(TOKEN_GC_PARENTHESES_CLOSED);
+    match(TOKEN_GC_CURLY_BRACKET_OPEN);
 
     // Parse body
     parser_parse_body();
