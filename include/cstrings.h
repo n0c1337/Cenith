@@ -13,4 +13,8 @@ void string_clear(char* str);
 void string_remove_new_lines(char* str);
 int string_is_alphanumeric(char* str);
 
+#define STRING_NEW(size) string_new(&global_allocator, size)
+#define STRING_FROM(str) string_from(&global_allocator, str)
+#define STRING_DELETE(str) string_delete(&global_allocator, str)
+
 #endif 

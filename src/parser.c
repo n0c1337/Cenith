@@ -31,8 +31,9 @@ void parser_parse_next() {
             buffer[index] = '\0';
             printf("Buffer: %s\n", buffer);
             *current_token = lexer_tokenize(buffer);
+            printf("Current token type: %i\n", current_token->type);
             index = 0;
-            content_character_idx = i+1;
+            content_character_idx = i + 1;
             break;
         } else {
             buffer[index++] = content[i];
@@ -46,7 +47,7 @@ void match(Tokens expected_token) {
         parser_parse_next();
     } else {
         printf("Error: Expected token %d, but got token %d\n", expected_token, current_token->type);
-        allocator_cleanup(&global_allocator);
+        allocator_destroy(&global_allocator);
         exit(-1);
     }
 }

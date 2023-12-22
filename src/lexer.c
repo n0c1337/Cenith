@@ -9,10 +9,10 @@ Token lexer_is_keyword(char* word) {
         {"i32", TOKEN_KEYWORD_i32, TOKEN_IDENTIFIER_TYPE},
         {"i64", TOKEN_KEYWORD_i64, TOKEN_IDENTIFIER_TYPE},
         {"float", TOKEN_KEYWORD_float, TOKEN_IDENTIFIER_TYPE},
-        {"if", TOKEN_KEYWORD_if, TOKEN_IDENTIFIER_TYPE},
-        {"for", TOKEN_KEYWORD_for, TOKEN_IDENTIFIER_TYPE},
-        {"while", TOKEN_KEYWORD_while, TOKEN_IDENTIFIER_TYPE},
-        {"return", TOKEN_KEYWORD_return, TOKEN_IDENTIFIER_TYPE},
+        {"if", TOKEN_KEYWORD_if, TOKEN_INVALID},
+        {"for", TOKEN_KEYWORD_for, TOKEN_INVALID},
+        {"while", TOKEN_KEYWORD_while, TOKEN_INVALID},
+        {"return", TOKEN_KEYWORD_return, TOKEN_INVALID},
         {NULL, TOKEN_INVALID, TOKEN_INVALID}
     };
 
@@ -32,14 +32,9 @@ Token lexer_tokenize(char* content) {
     
     // Check if token is a keyword
     token = lexer_is_keyword(content);
-    
-    // Check if token is a identifier
-    if (token.type == TOKEN_INVALID && string_is_alphanumeric(content)) {
-            token.type = TOKEN_IDENTIFIER;
-            token.value = content;
-    }
 
     // Check if token is an integer literal
+    // TODO:: Fix that spaces are threat as integers?
     if (token.type == TOKEN_INVALID) {
         int i = 0;
         while (content[i])
@@ -55,6 +50,12 @@ Token lexer_tokenize(char* content) {
         }
     }
 
+    // Check if token is a identifier
+    if (token.type == TOKEN_INVALID && string_is_alphanumeric(content)) {
+            token.type = TOKEN_IDENTIFIER;
+            token.value = content;
+    }
+
     // Check if token is a single grammatical character
     if (token.type == TOKEN_INVALID)
         token = lexer_tokenize_single(content[0]);
@@ -63,7 +64,7 @@ Token lexer_tokenize(char* content) {
 }
 
 Token lexer_tokenize_single(char ch) {
-    Token token = { -1, NULL, -1 };
+    Token token = { -1, NULL, -1, -1 };
     switch (ch) {
         case ';':
             token.type = TOKEN_GC_SEMICOLON;

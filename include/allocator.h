@@ -2,27 +2,28 @@
 #define ALLOCATOR_H
 
 #include <stdlib.h>
-#include <stdio.h>
 
-/*
-0 = disabled
-1 = enabled
-*/
-#define ALLOCATOR_OPTIMIZED_FREE 1 
-#define ALLOCATOR_INFORMATIONS 0
+#define STD_ALLOCATOR_ENHANCED_INFORMATIONS 0
+
+#if STD_ALLOCATOR_ENHANCED_INFORMATIONS == 1
+#include <stdio.h>
+#endif
+
+typedef struct linkedlist_t {
+    void* value;
+    struct linkedlist_t* next;
+} LinkedList;
 
 typedef struct allocator_t {
-    void** allocations;
-    size_t capacity;
-    int current_size;
+    LinkedList* allocations;
 } Allocator;
+
 
 extern Allocator global_allocator;
 
-void allocator_initialize(Allocator* allocator, size_t capacity);
-void allocator_cleanup(Allocator* allocator);
+void allocator_initialize(Allocator* allocator);
+void allocator_destroy(Allocator* allocator);
 void* allocator_alloc(Allocator* allocator, size_t size);
 void allocator_free(Allocator* allocator, void* ptr);
-void allocator_print_information(Allocator* allocator);
 
 #endif

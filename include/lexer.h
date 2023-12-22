@@ -26,7 +26,7 @@ typedef enum tokens_t {
     TOKEN_LITERAL_INTEGER,
     TOKEN_LITERAL_STRING,
     TOKEN_LITERAL_FLOAT,
-    // Grammatic characters
+    // Grammatical characters
     TOKEN_GC_PARENTHESES_OPEN,
     TOKEN_GC_PARENTHESES_CLOSED,
     TOKEN_GC_CURLY_BRACKET_OPEN,
@@ -51,6 +51,7 @@ typedef struct token_t {
     char* value;
     // Size of the Token
     long size;
+    // Of which type a specific token is (e.g. (i8, i16) -> are TOKEN_IDENTIFIER_TYPE)
     Tokens type_identifier;
 } Token;
 
