@@ -22,6 +22,7 @@ typedef enum tokens_t {
     TOKEN_IDENTIFIER,
     TOKEN_IDENTIFIER_TYPE,
     TOKEN_IDENTIFIER_POINTER,
+    TOKEN_IDENTIFIER_COMPARISON,
     // Literals
     TOKEN_LITERAL_INTEGER,
     TOKEN_LITERAL_STRING,
@@ -37,19 +38,23 @@ typedef enum tokens_t {
     // Function related
     TOKEN_FUNCTION_CALL,
     // Operators
-    TOKEN_OPERATOR_Plus,
-    TOKEN_OPERATOR_Minus,
-    TOKEN_OPERATOR_Multiply,
-    TOKEN_OPERATOR_Division,
-    TOKEN_OPERATOR_Assignment,
+    TOKEN_OPERATOR_PLUS,
+    TOKEN_OPERATOR_MINUS,
+    TOKEN_OPERATOR_MULTIPLY,
+    TOKEN_OPERATOR_DIVISION,
+    TOKEN_OPERATOR_ASSIGNMENT,
+    // Comparison
+    TOKEN_KEYWORD_LESS,
+    TOKEN_KEYWRD_LESS_EQUALS,
+    TOKEN_KEYWORD_EQUALS,
+    TOKEN_KEYWORD_NOT_EQUALS,
+    TOKEN_KEYWORD_GREATER,
+    TOKEN_KEYWORD_GREATER_EQUALS,
 } Tokens;
 
 typedef struct token_t {
-    // The exact type of the Token
     Tokens type;
-    // Tokens value (only used for control structures)
-    char* value;
-    // Size of the Token
+    char* content;
     long size;
     // Of which type a specific token is (e.g. (i8, i16) -> are TOKEN_IDENTIFIER_TYPE)
     Tokens type_identifier;

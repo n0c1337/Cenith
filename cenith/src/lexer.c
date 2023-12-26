@@ -13,6 +13,12 @@ Token lexer_is_keyword(char* word) {
         {"for", TOKEN_KEYWORD_for, TOKEN_INVALID},
         {"while", TOKEN_KEYWORD_while, TOKEN_INVALID},
         {"return", TOKEN_KEYWORD_return, TOKEN_INVALID},
+        {"<", TOKEN_KEYWORD_LESS, TOKEN_IDENTIFIER_COMPARISON},
+        {"<=", TOKEN_KEYWRD_LESS_EQUALS, TOKEN_IDENTIFIER_COMPARISON},
+        {"==", TOKEN_KEYWORD_EQUALS, TOKEN_IDENTIFIER_COMPARISON},
+        {"!=", TOKEN_KEYWORD_NOT_EQUALS, TOKEN_IDENTIFIER_COMPARISON},
+        {">", TOKEN_KEYWORD_GREATER, TOKEN_IDENTIFIER_COMPARISON},
+        {">=", TOKEN_KEYWORD_GREATER_EQUALS, TOKEN_IDENTIFIER_COMPARISON},
         {NULL, TOKEN_INVALID, TOKEN_INVALID}
     };
 
@@ -28,13 +34,17 @@ Token lexer_is_keyword(char* word) {
 }
 
 Token lexer_tokenize(char* content) {
-    Token token = { -1, NULL, -1, -1 };
+    char* token_content = string_from(&global_allocator, content);
+    Token token = { -1, token_content, -1, -1 };
     
     // Check if token is a keyword
     token = lexer_is_keyword(content);
 
+    if (strlen(content) == 0) {
+        return token;
+    }
+
     // Check if token is an integer literal
-    // TODO:: Fix that spaces are threat as integers?
     if (token.type == TOKEN_INVALID) {
         int i = 0;
         while (content[i])
@@ -53,7 +63,6 @@ Token lexer_tokenize(char* content) {
     // Check if token is a identifier
     if (token.type == TOKEN_INVALID && string_is_alphanumeric(content)) {
             token.type = TOKEN_IDENTIFIER;
-            token.value = content;
     }
 
     // Check if token is a single grammatical character
@@ -88,19 +97,19 @@ Token lexer_tokenize_single(char ch) {
             token.type = TOKEN_GC_SQUARE_BRACKET_CLOSED;
             break;
         case '+':
-            token.type = TOKEN_OPERATOR_Plus;
+            token.type = TOKEN_OPERATOR_PLUS;
             break;
         case '-':
-            token.type = TOKEN_OPERATOR_Minus;
+            token.type = TOKEN_OPERATOR_MINUS;
             break;
         case '*':
-            token.type = TOKEN_OPERATOR_Multiply;
+            token.type = TOKEN_OPERATOR_MULTIPLY;
             break;
         case '/':
-            token.type = TOKEN_OPERATOR_Division;
+            token.type = TOKEN_OPERATOR_DIVISION;
             break;
         case '=':
-            token.type = TOKEN_OPERATOR_Assignment;
+            token.type = TOKEN_OPERATOR_ASSIGNMENT;
             break;
     }
     return token;

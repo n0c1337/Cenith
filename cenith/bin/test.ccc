@@ -1,0 +1,7 @@
+void add ( ) {
+    i64[0; 4] my_array
+
+    for (i64 i = 0; i != 4; i++) {
+        my_array[i] = i
+    }
+}

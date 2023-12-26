@@ -29,9 +29,12 @@ void parser_parse_next() {
     for (int i = content_character_idx; i < strlen(content); i++) {
         if(content[i] == ' ') {
             buffer[index] = '\0';
-            printf("Buffer: %s\n", buffer);
+            printf("%s\n", buffer);
             *current_token = lexer_tokenize(buffer);
-            printf("Current token type: %i\n", current_token->type);
+            printf("%s -> %i\n", current_token->content, current_token->type);
+            if (current_token->type != TOKEN_INVALID && current_token->type_identifier != TOKEN_INVALID) {
+                ir_translate_to_ir(current_token);
+            }
             index = 0;
             content_character_idx = i + 1;
             break;
@@ -77,14 +80,31 @@ void parser_parse_body() {
         if (current_token->type == TOKEN_KEYWORD_if) { // Parse if statement
             parser_parse_if_statement();
         } else if (current_token->type == TOKEN_KEYWORD_for) { // Parse for loop
-
+            parse_parse_for_statement();
         } else if (current_token->type == TOKEN_KEYWORD_while) { // Parse while loop
 
         }
     }
+
+    match(TOKEN_GC_CURLY_BRACKET_CLOSED);
 }
 
 void parser_parse_if_statement() {
+    parser_parse_next();
+    match(TOKEN_GC_PARENTHESES_OPEN);
+
+    while (current_token->type != TOKEN_GC_PARENTHESES_CLOSED) {
+        parser_parse_next();
+    }
+
+    match(TOKEN_GC_PARENTHESES_CLOSED);
+    match(TOKEN_GC_CURLY_BRACKET_OPEN);
+
+    // Parse body
+    parser_parse_body();
+}
+
+void parse_parse_for_statement() {
     parser_parse_next();
     match(TOKEN_GC_PARENTHESES_OPEN);
 

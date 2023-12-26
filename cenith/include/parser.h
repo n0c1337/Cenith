@@ -13,5 +13,6 @@ void match(Tokens expected_token);
 void parser_parse_function();
 void parser_parse_body();
 void parser_parse_if_statement();
+void parse_parse_for_statement();
 
 #endif
