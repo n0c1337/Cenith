@@ -1,0 +1,15 @@
+void main()
+{
+    i32 helloworld = 1
+
+    for (i32 i = 2; i != 99; i ++) {
+        for (i64 a = 10; a > 5; a --) {
+            
+        }
+        i32 k = 3
+    }
+
+    i64 j = 42
+
+    return
+}
