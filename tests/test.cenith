@@ -1,0 +1,6 @@
+void cooltest( ) {
+    i32 a = 2 * 6;
+    for ( i32 i = 0; i <= 9; i = i + 1; ) {
+        i32 a = 0 + i;
+    }
+}
