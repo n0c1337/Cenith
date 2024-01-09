@@ -1,5 +1,5 @@
 section .text
-global test
+global cooltest
 cooltest:
 push rbp
 mov rbp, rsp
