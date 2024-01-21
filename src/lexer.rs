@@ -49,6 +49,12 @@ impl Lexer {
             token.ident = Tokens::LiteralFloat;
             return token
         }
+
+        if content.starts_with("&") {
+            token.token_type = Tokens::OperatorReference;
+            token.ident = Tokens::OperatorReference;
+            return token
+        }
         
         // Check for dereference
         if content.starts_with("@") {

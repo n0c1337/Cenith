@@ -1,6 +1,6 @@
-use std::{fs, process::exit};
+use std::{fs, process::exit, any::Any};
 
-use crate::{lexer::Lexer, tokens::{Tokens, is_delimiter_character, Token}, instruction::Instruction};
+use crate::{lexer::Lexer, tokens::{Tokens, is_delimiter_character, Token, LEA_REGISTER}, instruction::Instruction};
 
 #[derive(Clone, Debug)]
 pub struct Parser {
@@ -69,14 +69,26 @@ impl Parser {
         }
     }
 
+    pub fn get_current_token_and_advance(&mut self, token: Tokens) -> Box<Token> {
+        if self.current_token.token_type == token || self.current_token.ident == token {
+            let token = self.current_token.clone();
+            self.parse();
+            return token
+        }
+
+        println!("Expected token \x1b[91m{:?}\x1b[0m, but got \x1b[92m{:?}\x1b[0m \nPlease make sure you are following the correct syntax.", token, self.current_token.token_type);
+        exit(0)
+    }
+
     pub fn parse_function(&mut self) {
         self.advance(Tokens::IdentifierType);
-        self.advance(Tokens::Identifier);
+        let function_name = self.get_current_token_and_advance(Tokens::Identifier).content.unwrap();
+        self.instructions.push(Instruction::new(Tokens::Identifier, format!("{}:", function_name)));
         self.advance(Tokens::RoundBracketOpen);
 
         while self.current_token.token_type != Tokens::RoundBracketClosed {
             self.advance(Tokens::IdentifierType);
-            self.advance(Tokens::Identifier);
+            let variable_name = self.get_current_token_and_advance(Tokens::Identifier).content;
             if self.advance_check(Tokens::Commata) { /* Skip */ }
         }
 
@@ -119,18 +131,15 @@ impl Parser {
         self.instructions.push(Instruction::new(Tokens::Invalid, format!("JMP .L{}", self.depth + 10)));
         self.instructions.push(Instruction::new(Tokens::Invalid, format!(".L{}:", self.depth)));
         
-        /*
-            We are going to skip some tokens cause we handle them a bit different then before.
-         */
         self.parse(); // Skip Semicolon
-        let variable_name = self.current_token.content.clone().unwrap();
-        self.parse(); // Skip variable identifier
-        let condition = self.parse_condition(variable_name.as_str());
+        let variable = self.get_current_token_and_advance(Tokens::Identifier);
+        let variable_name = variable.content.unwrap();
+        let variable_type = variable.token_type;
+        let condition = self.parse_condition(&variable_name);
         self.parse(); // Skip condition
         self.advance(Tokens::Semicolon);
 
-        // TODO: resolve variable type just for having an identical convergence
-        self.parse_expression(&Tokens::Invalid, variable_name.as_str());
+        self.parse_expression(&variable_name, &variable_type);
         
         self.parse(); // Skip Semicolon
         self.advance(Tokens::RoundBracketClosed);
@@ -165,13 +174,10 @@ impl Parser {
     }
 
     fn parse_variable(&mut self) {
-        let variable_type = self.current_token.token_type.clone();
-        self.parse();
-        let variable_name = self.current_token.content.clone().unwrap();
-        self.advance(Tokens::Identifier);
+        let variable_type = self.get_current_token_and_advance(Tokens::IdentifierType).token_type;
+        let variable_name = self.get_current_token_and_advance(Tokens::Identifier).content.unwrap();
         self.advance(Tokens::OperatorAssign);
-
-        self.parse_statement(variable_name.as_str(), &variable_type);
+        self.parse_statement(&variable_name, &variable_type);
     }
 
     fn parse_statement(&mut self, variable_name: &str, variable_type: &Tokens) {
@@ -181,11 +187,11 @@ impl Parser {
         self.instructions.push(Instruction::new(variable_type.clone(), intermediate));
 
         if !self.advance_check(Tokens::Semicolon) {
-            self.parse_expression(variable_type, variable_name)
+            self.parse_expression(variable_name, variable_type)
         }
     }
 
-    fn parse_expression(&mut self, variable_type: &Tokens, variable_name: &str) {
+    fn parse_expression(&mut self, variable_name: &str, variable_type: &Tokens) {
         while self.current_token.token_type != Tokens::Semicolon {
             match self.current_token.token_type {
                 Tokens::OperatorPlus => self.parse_operation("ADD", variable_name, variable_type),
@@ -208,8 +214,8 @@ impl Parser {
 
     fn parse_operation(&mut self, operation_intermediate: &str, variable_name: &str, variable_type: &Tokens) {
         self.parse();
-        let value = self.current_token.content.clone().unwrap();
-        let intermediate = format!("{} {}, {}", operation_intermediate, variable_name, value);
+        let operand_2 = self.current_token.content.clone().unwrap();
+        let intermediate = format!("{} {}, {}", operation_intermediate, variable_name, operand_2);
         
         self.instructions.push(Instruction::new(variable_type.clone(), intermediate))
     }

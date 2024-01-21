@@ -1,7 +1,7 @@
 #include <stdio.h>
 
-extern int cooltest(void);
+extern int test(void);
 
 int main(void) {
-    printf("%d\n", cooltest());
+    printf("%d\n", test());
 }

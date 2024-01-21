@@ -39,6 +39,7 @@ pub enum Tokens {
     OperatorDivision,
     OperatorModulo,
     OperatorAssign,
+    OperatorReference,
     OperatorDereference, // @
     // Bitwise
     OperatorBitwiseAnd,
@@ -168,3 +169,16 @@ pub fn get_token_stack_size(size: i32) -> &'static str {
         _ => "Invalid"
     }
 }
+
+pub fn get_right_sized_register(size: i32) -> &'static str {
+    match size {
+        1 => "r10b",
+        2 => "r10w",
+        4 => "r10d",
+        8 => "r10", 
+        _ => "r10" // Crazy performance improvment always returning a 64 Bit Register.
+    }
+}
+
+// Multi-purpose register definitions
+pub const LEA_REGISTER: &str = "r11";

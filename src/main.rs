@@ -1,7 +1,7 @@
 use assembler::Assembler;
+use parser::Parser;
 
-use crate::parser::Parser;
-
+mod manager;
 mod assembler;
 mod instruction;
 mod lexer;
@@ -15,7 +15,7 @@ fn main() {
     parser.parse_function();
 
     for i in &parser.instructions {
-        println!("{:?}", *i)
+        println!("{:?}", i)
     }
 
     let mut assembler = Assembler::new(parser.instructions);
