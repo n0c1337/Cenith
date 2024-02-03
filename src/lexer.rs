@@ -3,11 +3,7 @@ use crate::tokens::{Tokens, Token};
 pub struct Lexer;
 
 impl Lexer {
-    pub fn new() -> Self {
-        Lexer
-    }
-
-    pub fn lex(&self, content: &str) -> Token {
+    pub fn lex(content: &str) -> Token {
         let mut token = Token::default();
         token.content = Some(content.to_string());
 

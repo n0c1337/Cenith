@@ -56,7 +56,7 @@ pub enum Tokens {
     CurlyBracketOpen,
     CurlyBracketClosed,
     Semicolon,
-    Commata
+    Comma
 }
 
 impl Tokens {
@@ -105,7 +105,7 @@ impl Tokens {
             "{" => Tokens::CurlyBracketOpen,
             "}" => Tokens::CurlyBracketClosed,
             ";" => Tokens::Semicolon,
-            "," => Tokens::Commata,
+            "," => Tokens::Comma,
             _ => Tokens::Invalid,
         }
     }
@@ -139,7 +139,6 @@ impl Token {
 
 pub fn is_delimiter_character(ch: char) -> bool {
     match ch {
-        ' ' => true,
         '(' => true,
         ')' => true,
         '{' => true,

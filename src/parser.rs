@@ -1,6 +1,6 @@
-use std::{fs, process::exit, any::Any};
+use std::{fs, process::exit};
 
-use crate::{lexer::Lexer, tokens::{Tokens, is_delimiter_character, Token, LEA_REGISTER}, instruction::Instruction};
+use crate::{lexer::Lexer, tokens::{Tokens, is_delimiter_character, Token}, instruction::Instruction};
 
 #[derive(Clone, Debug)]
 pub struct Parser {
@@ -16,44 +16,40 @@ impl Parser {
     }
 
     pub fn parse(&mut self) {
-        let to_be_parsed = fs::read_to_string("./tests/test.cenith")
-            .expect("Couldn't read file.");
+        let file_content = fs::read_to_string("./tests/test.cenith").expect("Couldn't read file.");
 
-        let mut character_iterator = to_be_parsed.chars().skip(self.start_index);
-        
-        while let Some(c) = character_iterator.next() {
-            if !c.is_whitespace() {
-                break;
-            }
+        if self.start_index > file_content.len() {
+            return;
+        }
 
+        let mut token = String::new();
+
+        if file_content.chars().nth(self.start_index).unwrap().is_whitespace() {
             self.start_index += 1;
         }
 
-        let mut end_index = self.start_index;
-
-        while let Some(c) = character_iterator.next() {
-            if c.is_whitespace() || is_delimiter_character(c) {
+        for c in file_content.chars().skip(self.start_index) {
+            if c.is_whitespace() {
                 break;
             }
 
-            end_index += 1;
+            if is_delimiter_character(c) {
+                if token.is_empty() {
+                    token.push(c);
+                    self.start_index += 1;
+                }
+                break;
+            }
+
+            token.push(c);
+            self.start_index += 1;
         }
 
-        if end_index >= to_be_parsed.len() {
-            return;
-        }
-        
-        println!("{} -> {}", self.start_index, end_index);
-        println!("|{}|", &to_be_parsed[self.start_index..=end_index]);
-
-        let token = Box::new(Lexer::new().lex(&to_be_parsed[self.start_index..=end_index]));
-        *self.current_token = *token;
-        println!("{:?}", *self.current_token);
-
-        self.start_index = end_index+1;
+        *self.current_token = *Box::new(Lexer::lex(&token));
+        println!("{:?}", self.current_token)
     }
 
-    pub fn advance_check(&mut self, token: Tokens) -> bool {
+    pub fn expect_check(&mut self, token: Tokens) -> bool {
         if self.current_token.token_type == token || self.current_token.ident == token {
             self.parse();
             true
@@ -62,14 +58,14 @@ impl Parser {
         }
     }
 
-    pub fn advance(&mut self, token: Tokens) {
-        if !self.advance_check(token.clone()) {
+    pub fn expect(&mut self, token: Tokens) {
+        if !self.expect_check(token.clone()) {
             println!("Expected token \x1b[91m{:?}\x1b[0m, but got \x1b[92m{:?}\x1b[0m \nPlease make sure you are following the correct syntax.", token, self.current_token.token_type);
             exit(0)
         }
     }
 
-    pub fn get_current_token_and_advance(&mut self, token: Tokens) -> Box<Token> {
+    pub fn get_current_token_and_expect(&mut self, token: Tokens) -> Box<Token> {
         if self.current_token.token_type == token || self.current_token.ident == token {
             let token = self.current_token.clone();
             self.parse();
@@ -81,68 +77,66 @@ impl Parser {
     }
 
     pub fn parse_function(&mut self) {
-        self.advance(Tokens::IdentifierType);
-        let function_name = self.get_current_token_and_advance(Tokens::Identifier).content.unwrap();
-        self.instructions.push(Instruction::new(Tokens::Identifier, format!("{}:", function_name)));
-        self.advance(Tokens::RoundBracketOpen);
+        self.expect(Tokens::IdentifierType);
+        let function_name = self.get_current_token_and_expect(Tokens::Identifier).content.unwrap();
+        //self.instructions.push(Instruction::new(Tokens::Identifier, format!("{}:", function_name)));
+        
+        self.expect(Tokens::RoundBracketOpen);
 
-        while self.current_token.token_type != Tokens::RoundBracketClosed {
-            self.advance(Tokens::IdentifierType);
-            let variable_name = self.get_current_token_and_advance(Tokens::Identifier).content;
-            if self.advance_check(Tokens::Commata) { /* Skip */ }
+        while !self.expect_check(Tokens::RoundBracketClosed) {
+            self.expect(Tokens::IdentifierType);
+            let parameter_name = self.get_current_token_and_expect(Tokens::Identifier).content.unwrap();
+            if !self.expect_check(Tokens::Comma) { 
+                self.expect(Tokens::RoundBracketClosed); 
+                break 
+            }
         }
-
-        self.advance(Tokens::RoundBracketClosed);
 
         self.parse_body();
     }
 
     fn parse_body(&mut self) {
-        self.advance(Tokens::CurlyBracketOpen);
+        self.expect(Tokens::CurlyBracketOpen);
         self.depth += 1;
 
-        {
-            while self.current_token.token_type != Tokens::CurlyBracketClosed {
-                if self.current_token.token_type == Tokens::CurlyBracketOpen {
-                    self.parse_body()
-                } else if self.current_token.token_type == Tokens::For {
-                    self.parse();
-                    self.parse_for_loop()
-                } else if self.current_token.token_type == Tokens::If {
-                    self.parse();
-                    self.parse_if_statement()
-                } else if self.current_token.ident == Tokens::IdentifierType {
-                    self.parse_variable()
-                }
-
-                // Parse next token
+        while self.current_token.token_type != Tokens::CurlyBracketClosed {
+            if self.current_token.token_type == Tokens::CurlyBracketOpen {
+                self.parse_body()
+            } else if self.current_token.token_type == Tokens::For {
                 self.parse();
+                self.parse_for_loop()
+            } else if self.current_token.token_type == Tokens::If {
+                self.parse();
+                self.parse_if_statement()
+            } else if self.current_token.ident == Tokens::IdentifierType {
+                self.parse_variable()
             }
+            // Parse next token
+            self.parse();
         }
 
-        //self.advance(Tokens::CurlyBracketClosed); This will cause the very first token after the closed curly bracket to be loss
         self.depth -= 1;
     }
 
     fn parse_for_loop(&mut self) {
-        self.advance(Tokens::RoundBracketOpen);
+        self.expect(Tokens::RoundBracketOpen);
 
         self.parse_variable();
         self.instructions.push(Instruction::new(Tokens::Invalid, format!("JMP .L{}", self.depth + 10)));
         self.instructions.push(Instruction::new(Tokens::Invalid, format!(".L{}:", self.depth)));
         
-        self.parse(); // Skip Semicolon
-        let variable = self.get_current_token_and_advance(Tokens::Identifier);
+        self.expect(Tokens::Semicolon);
+        let variable = self.get_current_token_and_expect(Tokens::Identifier);
         let variable_name = variable.content.unwrap();
         let variable_type = variable.token_type;
         let condition = self.parse_condition(&variable_name);
         self.parse(); // Skip condition
-        self.advance(Tokens::Semicolon);
+        self.expect(Tokens::Semicolon);
 
         self.parse_expression(&variable_name, &variable_type);
         
-        self.parse(); // Skip Semicolon
-        self.advance(Tokens::RoundBracketClosed);
+        self.expect(Tokens::Semicolon);
+        self.expect(Tokens::RoundBracketClosed);
 
         self.parse_body(); // Parse content inside the new body
 
@@ -174,9 +168,9 @@ impl Parser {
     }
 
     fn parse_variable(&mut self) {
-        let variable_type = self.get_current_token_and_advance(Tokens::IdentifierType).token_type;
-        let variable_name = self.get_current_token_and_advance(Tokens::Identifier).content.unwrap();
-        self.advance(Tokens::OperatorAssign);
+        let variable_type = self.get_current_token_and_expect(Tokens::IdentifierType).token_type;
+        let variable_name = self.get_current_token_and_expect(Tokens::Identifier).content.unwrap();
+        self.expect(Tokens::OperatorAssign);
         self.parse_statement(&variable_name, &variable_type);
     }
 
@@ -186,7 +180,7 @@ impl Parser {
         let intermediate = format!("ASSIGN {}, {}", variable_name, value);
         self.instructions.push(Instruction::new(variable_type.clone(), intermediate));
 
-        if !self.advance_check(Tokens::Semicolon) {
+        if !self.expect_check(Tokens::Semicolon) {
             self.parse_expression(variable_name, variable_type)
         }
     }

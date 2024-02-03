@@ -1,8 +1,8 @@
-void test( ) {
+void test(i32 paramter) {
     i32 a = 2 * 6;
     i32 b = 0;
 
-    for ( i32 i = 0; i != 9; i = i + 1; ) {
-        i32 b = i;
+    for (i32 i = 0; i != 9; i = i + 1;) {
+        i32 b = i * 2;
     }
 }
